@@ -125,15 +125,47 @@ open class CLSAlbumMgr: NSObject {
     /// 获取所有相册信息
     ///
     /// - Returns: 所有相册
-    public func fGetAllCollecttions() -> PHFetchResult<PHAssetCollection> {
+    public func fGetAllCollections() -> PHFetchResult<PHAssetCollection> {
         
         let opt = PHFetchOptions()
+//        opt.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
         let smartAlbums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum,
                                                                   subtype: .albumRegular,
                                                                   options: opt)
         return smartAlbums
     }
     
+    public func fGetSystemsAndUserCollections() -> [PHAssetCollection] {
+        
+        var arrCollections = [PHAssetCollection]()
+        
+        let systemCollections = fGetAllCollections()
+        for i in 0 ..< systemCollections.count {
+            
+            let collection = systemCollections.object(at: i)
+            if collection.localizedTitle == "Camera Roll" {
+                
+                arrCollections.append(collection)
+            }
+//            print("\(collection.localizedTitle)")
+        }
+        for i in 0 ..< systemCollections.count {
+            
+            let collection = systemCollections.object(at: i)
+            if collection.localizedTitle == "Favorites" {
+                
+                arrCollections.append(collection)
+            }
+        }
+        
+        let allUserCollections = PHCollectionList.fetchTopLevelUserCollections(with: nil)
+        for i in 0 ..< allUserCollections.count {
+            
+            arrCollections.append(allUserCollections.object(at: i) as! PHAssetCollection)
+        }
+        
+        return arrCollections
+    }
     
     /// 获取当前相册第一张图片
     ///
@@ -143,6 +175,7 @@ open class CLSAlbumMgr: NSObject {
         
         let opt = PHFetchOptions.init()
         opt.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        opt.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
         let asset = PHAsset.fetchAssets(in: collection, options: opt)
         return asset
     }
@@ -261,9 +294,15 @@ open class CLSAlbumMgr: NSObject {
         })
     }
     
-//    func fGet(<#parameters#>) -> <#return type#> {
-//        <#function body#>
-//    }
+    // MARK: 获取当前权限
+    
+    /// 获取权限
+    ///
+    /// - Parameter block: status == authorized 表示可以访问相册
+    public func fGetAuthorizationStatus(_ block: @escaping (_ status: PHAuthorizationStatus) -> Void) {
+        
+        PHPhotoLibrary.requestAuthorization(block)
+    }
 }
 
 // 当照片有更新时，通知
