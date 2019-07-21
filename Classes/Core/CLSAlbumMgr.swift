@@ -8,7 +8,7 @@
 
 import UIKit
 import Photos
-import CLSCommon
+//import CLSCommon
 
 open class CLSAlbumMgr: NSObject {
 
@@ -170,12 +170,19 @@ open class CLSAlbumMgr: NSObject {
     /// 获取当前相册第一张图片
     ///
     /// - Parameter collection: 相册
+    /// - Parameter fetchLimit: 0 = 所有照片
     /// - Returns: 放回图片
-    public func fGetPHAssetsFromCollection(collection: PHAssetCollection) -> PHFetchResult<PHAsset> {
+    public func fGetPHAssetsFromCollection(collection: PHAssetCollection, fetchLimit: Int = 0) -> PHFetchResult<PHAsset> {
         
         let opt = PHFetchOptions.init()
         opt.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         opt.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+        if #available(iOS 9.0, *) {
+            
+            opt.fetchLimit = fetchLimit
+        } else {
+            // Fallback on earlier versions
+        }
         let asset = PHAsset.fetchAssets(in: collection, options: opt)
         return asset
     }
