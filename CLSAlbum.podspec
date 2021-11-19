@@ -21,6 +21,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/ccloveswift/CLSAlbum.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
+  s.platform     = :ios, '12.0'
 
   s.default_subspec     = 'Core'
 
